@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prosta Aplikacja Pogodowa</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="grid">
+            <div class="weather-container" id="weather-container">
+                <h2>Prognoza</h2>
+                <div class="search-container">
+                    <input class="search1" type="text" id="city" placeholder="Enter city">
+                    <button class="btn1" onclick="getWeather()">Search</button>
+                </div>
+                <div class="info-con">
+                    <img id="weather-icon">
+            
+                    <div id="temp-div"></div>
+            
+                    <div id="weather-info"></div>
+                </div>
+            
+                <div id="hourly-forecast"></div>
+                <canvas id="rainForecast" width="400" height="200"></canvas>
+
+            </div>
+            <div class="tile rain-history-tile">
+                <h2>Historia opadów w <span id="cityName"> &nbsp;</span></h2>
+                <label for="startDate">Data początkowa:</label>
+                <input type="date" id="startDate" />
+                <label for="endDate">Data końcowa:</label>
+                <input type="date" id="endDate" />
+                <div class="button-container">
+                    <button class="btn" id="getRainHistory">Pokaż historię opadów</button>
+                    <button class="btn" id="getAverageRain">Dodaj średnią opadów</button>
+                    <button class="btn" id="getTotalRain">Oblicz sumę opadów</button>
+                </div>
+                <canvas id="rainChart" width="400" height="200"></canvas>
+                <div id="historicalWeatherResult"></div>
+                <div id="averageRainResult"></div>
+                <div id="totalRainResult"></div>
+            </div>
+            
+        </div>
+    </div>
+<script src="script2.js"></script>
+</body>
+</html>
