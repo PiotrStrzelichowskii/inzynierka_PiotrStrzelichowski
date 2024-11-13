@@ -32,28 +32,21 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     margin-top: auto;
-    margin-top: 3rem;
+    margin-top: 2rem;
     margin-bottom: 3rem;
-}
-
-
-.tile, .weather-container {
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 25px;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .info-con {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 10px;
+    max-height: 160px;
 }
 
 
 #weather-icon {
-    max-width: 100%;
+    max-width: 160px;
 }
 
 #temp-div, #weather-info {
@@ -68,15 +61,16 @@ body {
 }
 
 #weather-info {
-    font-size: 16px;
+    font-size: 15px;
     color: #666;
 }
 #hourly-forecast {
+    justify-content: center;
     display: flex;
     overflow-x: auto; 
     gap: 10px; 
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
+    margin: 0 1rem;
+    min-height: 130px;
 }
 
 .hourly-item {
@@ -91,12 +85,11 @@ body {
 }
 
 .hourly-item img {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
 }
 
-.weather-tile input[type="text"], 
-.rain-history-tile input[type="date"] {
+.weather-tile input[type="text"] {
     width: calc(100% - 22px);
     padding: 10px;
     margin-bottom: 10px;
@@ -105,29 +98,96 @@ body {
     box-sizing: border-box;
 }
 
-#rainChart {
-    width: 100%;
-    height: 500px; /* Adjusted height for larger chart */
-    margin-top: 20px;
+.rain-history-tile input[type="date"] {
+    width: auto;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 1rem;
+    box-sizing: border-box;
 }
+.tile, .weather-container, .map-con {
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 25px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.tile{
+    margin-bottom: 2rem;
+}
+
+#rainForecast {
+    width: 100%;
+    max-height: 280px;
+    margin: 1rem;
+}
+
+#rainChart {
+    width: auto;
+    max-height: 400px;
+    margin-right: 4rem;
+    margin-left: 4rem;
+}
+
+/* Styl dla okienka statystyk, aby pojawiło się nad wykresem */
+.stats-box {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 10;
+    transition: max-height 0.3s ease;
+    max-height: 16px; /* Ukryte szczegóły, początkowy stan */
+    overflow: hidden;
+    width: 150px;
+}
+
+.stats-box.open {
+    max-height: 100px; /* Wysokość po rozwinięciu */
+}
+
+.stats-box h3 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.stats-box p {
+    margin: 5px 0 0;
+    font-size: 13px;
+}
+
+
+
 
 #weatherResult, #historicalWeatherResult {
     margin-top: 20px;
     font-size: 1.2em;
 }
 
-h2 {
-    font-size: 1.5em;
-}
-
 label {
     display: block;
     margin: 10px 0 5px;
+}
+label, .btn {
+    font-size: 12px; /* Zmniejszenie rozmiaru tekstu przycisków i etykiet */
 }
 .search-container{
     display: flex;
     gap: 10px;
     justify-content: center;
+    margin-top: 2rem;
 }
 .search1{
     width: 250px;
@@ -141,7 +201,7 @@ label {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 10px; 
+    gap: 5px; 
     margin-top: 10px;
 }
 
@@ -176,14 +236,55 @@ label {
 }
 
 
+.map{
+    border-radius: 1rem;
+}
 
 
 
+.date-and-buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Wyrównanie do dołu */
+    gap: 20px; /* Odstęp między datami a przyciskami */
+    flex-wrap: wrap; /* Umożliwia przenoszenie elementów w przypadku małego ekranu */
+}
 
+.date-input {
+    display: flex;
+    flex-direction: column; /* Etykieta nad inputem */
+}
+
+.date-input label {
+    margin-bottom: 5px; /* Odstęp między etykietą a inputem */
+    font-size: 14px;
+}
+
+.date-input input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 1rem;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
 
 
 
 @media screen and (max-width: 720px) {
+    .date-and-buttons-container {
+        flex-direction: column; /* Układaj daty i przyciski jeden pod drugim na małych ekranach */
+        align-items: center;
+    }
+
+    .button-container {
+        justify-content: center;
+    }
+
     body {
         flex-direction: column;
         height: auto;
@@ -196,3 +297,6 @@ label {
 
    
 }
+
+
+
