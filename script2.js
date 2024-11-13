@@ -52,7 +52,7 @@ function getCurrentLocation() {
     }
 }
 
-// Function to get current weather
+// Funkcja do aktualnej pogody
 function getWeather() {
     const city = document.getElementById('city').value;
 
@@ -69,7 +69,7 @@ function getWeather() {
         .then(data => {
             displayWeather(data);
             // Uaktualnienie nazwy miasta w historii opadów
-            document.getElementById('cityName').textContent = city; // Dodaj tę linijkę
+            document.getElementById('cityName').textContent = city; 
         })
         .catch(error => {
             console.error('Błąd podczas pobierania danych o bieżącej pogodzie:', error);
@@ -88,8 +88,21 @@ function getWeather() {
 }
 
 
+// Mapa tłumaczeń angielskiego opisu pogody na polski
+const translations = {
+    "clear sky": "czyste niebo",
+    "few clouds": "małe zachmurzenie",
+    "scattered clouds": "rozproszone chmury",
+    "broken clouds": "zachmurzenie duże",
+    "shower rain": "przelotny deszcz",
+    "rain": "deszcz",
+    "thunderstorm": "burza",
+    "snow": "śnieg",
+    "mist": "mgła"
+};
 
-// Function to display current weather
+
+
 function displayWeather(data) {
     const tempDivInfo = document.getElementById('temp-div');
     const weatherInfoDiv = document.getElementById('weather-info');
@@ -104,9 +117,12 @@ function displayWeather(data) {
     } else {
         const cityName = data.name;
         const temperature = Math.round(data.main.temp - 273.15); // Convert to Celsius
-        const description = data.weather[0].description;
+        let description = data.weather[0].description;
         const iconCode = data.weather[0].icon;
         const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+
+        // Sprawdź, czy opis ma polskie tłumaczenie, jeśli nie, użyj oryginału
+        description = translations[description] || description;
 
         tempDivInfo.innerHTML = `<p>${temperature}°C</p>`;
         weatherInfoDiv.innerHTML = `<p>${cityName}</p><p>${description}</p>`;
@@ -115,6 +131,7 @@ function displayWeather(data) {
         weatherIcon.style.display = 'block'; // Show icon
     }
 }
+
 
 // Function to display hourly forecast
 function displayHourlyForecast(hourlyData) {
@@ -216,11 +233,16 @@ function displayRainChart(rainData) {
     const labels = Object.keys(rainData);
     const data = Object.values(rainData);
 
-    // Sprawdź, czy rainChart istnieje i zniszcz, jeśli tak
+    // Oblicz sumę i średnią opadów
+    const sumaOpadow = data.reduce((sum, rain) => sum + rain, 0);
+    const sredniaOpadow = sumaOpadow / data.length;
+
+    // Sprawdź, czy rainChart istnieje i zniszcz go, jeśli tak
     if (window.rainChart instanceof Chart) {
-        window.rainChart.destroy(); // Destroy previous chart instance if exists
+        window.rainChart.destroy();
     }
 
+    // Tworzymy nowy wykres
     window.rainChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -234,6 +256,8 @@ function displayRainChart(rainData) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -252,7 +276,30 @@ function displayRainChart(rainData) {
         }
     });
 
-    const historicalWeatherResult = document.getElementById('historicalWeatherResult');
+    // Odświeżanie okienka statystyk z nowymi wartościami
+    let statsBox = document.querySelector('.stats-box');
+    if (!statsBox) {
+        // Jeśli statsBox jeszcze nie istnieje, tworzymy je
+        statsBox = document.createElement('div');
+        statsBox.classList.add('stats-box');
+        statsBox.addEventListener('click', toggleStatsBox);
+        const chartContainer = document.getElementById('rainChart').parentNode;
+        chartContainer.style.position = 'relative'; // Pozycjonowanie kontenera
+        chartContainer.appendChild(statsBox);
+    }
+
+    // Aktualizacja treści okienka statystyk i automatyczne jego zwinięcie
+    statsBox.innerHTML = `
+        <h3>Statystyki ▼</h3>
+        <p>Suma opadów: ${sumaOpadow.toFixed(2)} mm</p>
+        <p>Średnia opadów: ${sredniaOpadow.toFixed(2)} mm</p>
+    `;
+    statsBox.classList.remove('open'); // Zwinięcie okienka po aktualizacji
+}
+
+// Funkcja do rozwijania i zwijania okienka statystyk
+function toggleStatsBox() {
+    this.classList.toggle('open');
 }
 
 
@@ -296,24 +343,6 @@ document.getElementById('getRainHistory').addEventListener('click', function() {
     getHistoricalWeather(city, startDate, endDate); // Pobierz dane historyczne
 });
 
-// Event listener dla przycisku obliczania średniej opadów
-document.getElementById('getAverageRain').addEventListener('click', function() {
-    if (storedRainData) { // Sprawdzenie, czy dane opadów są dostępne
-        calculateAverageRain(storedRainData); // Oblicz i wyświetl średnią
-    } else {
-        alert('Najpierw pobierz dane historyczne.');
-    }
-});
-
-// Event listener dla przycisku obliczania sumy opadów
-document.getElementById('getTotalRain').addEventListener('click', function() {
-    if (storedRainData) { // Sprawdzenie, czy dane opadów są dostępne
-        calculateTotalRain(storedRainData); // Oblicz i wyświetl sumę
-    } else {
-        alert('Najpierw pobierz dane historyczne.');
-    }
-});
-
 
 
 
@@ -355,26 +384,25 @@ function displayRainForecastChart(forecastData) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false, 
             scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Data'
-                    },
-                    ticks: {
-                        maxRotation: 0, // Zmniejsz rotację etykiet na osi X
-                        minRotation: 0
-                    }
-                },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
                         text: 'Opady (mm)'
                     }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Data'
+                    }
                 }
             }
         }
+        
     });
 }
 
