@@ -9,11 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
-
-
 </head>
 <body>
     <div class="container">
@@ -25,27 +24,20 @@
                 </div>
                 <div class="info-con">
                     <img id="weather-icon">
-            
                     <div id="temp-div"></div>
-            
                     <div id="weather-info"></div>
                 </div>
-            
                 <div id="hourly-forecast"></div>
-                <canvas id="rainForecast" ></canvas>
-
+                <canvas id="rainForecast"></canvas>
             </div>
             <div class="map-con">
                 <iframe class="map" src="https://www.rainviewer.com/map.html?loc=52.069,19.480,4.5&oCS=1&c=3&o=83&lm=1&layer=sat-rad&sm=1&sn=1&ts=2" 
                 width="100%" frameborder="0" style="border:0;height:100%;" allowfullscreen></iframe>
             </div>
-            
-            
         </div>
         <div class="grid2">
-            <div class="tile rain-history-tile">
+            <div class="tile rain-history-tile" id="rainhistorycontainer">
                 <h2>Historia opadów w <span id="cityName"> &nbsp;</span></h2>
-            
                 <div class="date-and-buttons-container">
                     <div class="date-input">
                         <label for="startDate">Data początkowa:</label>
@@ -57,17 +49,26 @@
                     </div>
                     <div class="button-container">
                         <button class="btn" id="getRainHistory">Pokaż historię opadów</button>
+                        
+                        <button class="btn" id="compareCitiesButton">Porównaj dwa miasta</button>
+                        <button class="btn" id="dowloadxlsx1" onclick=" downloadRainData()">Pobierz dane xlsx</button>
+                        <button class="btn" id="dowloadxlsx2" onclick=" downloadRainDataTwoCities()">Pobierz dane xlsx</button>
                     </div>
                 </div>
-            
+                <div id="cityInputsContainer" style="display: none;">
+                    <input class="search1" type="text" id="cityInput1" placeholder="Wpisz pierwsze miasto" />
+                    <input type="text" id="cityInput2" placeholder="Wpisz drugie miasto" />
+                    <button class="btn1" id="getRainHistoryTwo">Wyświetl</button>
+                </div>
                 <canvas id="rainChart" width="400" height="200"></canvas>
-                <div id="historicalWeatherResult"></div>
+                <div class="charts-container" style="display: none;">
+                    <canvas id="rainChart1" ></canvas>
+                    <canvas id="rainChart2" ></canvas>
+                </div>
             </div>
-            
-            
         </div>
-        
     </div>
 <script src="script2.js"></script>
 </body>
 </html>
+
