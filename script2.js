@@ -98,7 +98,8 @@ const translations = {
     "rain": "deszcz",
     "thunderstorm": "burza",
     "snow": "śnieg",
-    "mist": "mgła"
+    "mist": "mgła",
+    "fog": "mgła"
 };
 
 
@@ -228,53 +229,46 @@ function displayRainForecastChart(forecastData) {
 
 
 
+// Funkcja do pobierania danych historycznych dla wybranego okresu
+async function getHistoricalWeather(city, startDate, endDate) {
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`);
+        const data = await response.json();
+        const cityId = data.city.id;
+        const startTimestamp = new Date(startDate).getTime() / 1000;
+        const endTimestamp = new Date(endDate).getTime() / 1000;
 
-// Function to get historical weather data for the specified date range
-function getHistoricalWeather(city, startDate, endDate) {
-    fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`)
-        .then(response => response.json())
-        .then(data => {
-            const cityId = data.city.id;
-            const startTimestamp = new Date(startDate).getTime() / 1000;
-            const endTimestamp = new Date(endDate).getTime() / 1000;
-
-            fetchHistoricalData(cityId, startTimestamp, endTimestamp);
-        })
-        .catch(error => console.error('Błąd podczas pobierania ID miasta:', error));
+        // Pobieramy dane historyczne
+        await fetchHistoricalData(cityId, startTimestamp, endTimestamp);
+    } catch (error) {
+        console.error('Błąd podczas pobierania danych historycznych:', error);
+    }
 }
 
-// Function to fetch historical data for the selected date range
-function fetchHistoricalData(cityId, startTimestamp, endTimestamp) {
+// Funkcja do pobierania danych historycznych w 7-dniowych okresach
+async function fetchHistoricalData(cityId, startTimestamp, endTimestamp) {
     let currentStart = startTimestamp;
     let historicalData = [];
 
-    const fetchNextPeriod = () => {
-        const currentEnd = Math.min(currentStart + (7 * 24 * 60 * 60), endTimestamp); // Fetch data in 7-day chunks
-
+    while (currentStart < endTimestamp) {
+        const currentEnd = Math.min(currentStart + (7 * 24 * 60 * 60), endTimestamp); // Pobieramy dane w 7-dniowych okresach
         const url = `https://history.openweathermap.org/data/2.5/history/city?id=${cityId}&type=hour&start=${currentStart}&end=${currentEnd}&appid=${apiKey}`;
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                historicalData = historicalData.concat(data.list);
-                console.log(`Pobrano dane dla okresu: ${new Date(currentStart * 1000)} - ${new Date(currentEnd * 1000)}`);
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            historicalData = historicalData.concat(data.list);
+            console.log(`Pobrano dane dla okresu: ${new Date(currentStart * 1000)} - ${new Date(currentEnd * 1000)}`);
+            currentStart = currentEnd;
+        } catch (error) {
+            console.error('Błąd podczas pobierania danych historycznych:', error);
+        }
+    }
 
-                if (currentEnd < endTimestamp) {
-                    currentStart = currentEnd;
-                    fetchNextPeriod();
-                } else {
-                    processHistoricalData(historicalData);
-                }
-            })
-            .catch(error => {
-                console.error('Błąd podczas pobierania danych historycznych:', error);
-            });
-    };
-
-    fetchNextPeriod();
+    processHistoricalData(historicalData); // Przetwarzamy dane po zakończeniu pobierania
 }
 
-
+// Funkcja do przetwarzania pobranych danych historycznych
 function processHistoricalData(historicalData) {
     const rainData = {};
     historicalData.forEach(item => {
@@ -284,27 +278,33 @@ function processHistoricalData(historicalData) {
         if (!rainData[date]) {
             rainData[date] = 0;
         }
-        rainData[date] += rain; // Sum up rain for the same day
+        rainData[date] += rain; // Sumujemy opady dla tego samego dnia
     });
 
     storedRainData = rainData; // Przechowywanie danych opadów
 
     displayRainChart(rainData); // Wyświetlenie wykresu
-    // Usunięcie wywołań obliczania średniej i sumy
 }
 
-
-// Function to display rain data on a chart
+// Funkcja do wyświetlania wykresu z danymi opadów
 function displayRainChart(rainData) {
     const ctx = document.getElementById('rainChart').getContext('2d');
     const labels = Object.keys(rainData);
     const data = Object.values(rainData);
 
-    // Oblicz sumę i średnią opadów
+    // Obliczamy sumę, średnią i maksymalną wartość opadów
     const sumaOpadow = data.reduce((sum, rain) => sum + rain, 0);
     const sredniaOpadow = sumaOpadow / data.length;
+    const maxOpadow = Math.max(...data);
 
-    // Sprawdź, czy rainChart istnieje i zniszcz go, jeśli tak
+    const backgroundColors = data.map(value =>
+        value === maxOpadow ? 'rgba(255, 99, 132, 0.5)' : 'rgba(54, 162, 235, 0.5)'
+    );
+    const borderColors = data.map(value =>
+        value === maxOpadow ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)'
+    );
+
+    // Sprawdzamy, czy rainChart istnieje i niszczymy go, jeśli tak
     if (window.rainChart instanceof Chart) {
         window.rainChart.destroy();
     }
@@ -317,8 +317,8 @@ function displayRainChart(rainData) {
             datasets: [{
                 label: 'Opady (mm)',
                 data: data,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
                 borderWidth: 1
             }]
         },
@@ -343,41 +343,31 @@ function displayRainChart(rainData) {
         }
     });
 
-    // Odświeżanie okienka statystyk z nowymi wartościami
     let statsBox = document.querySelector('.stats-box');
     if (!statsBox) {
-        // Jeśli statsBox jeszcze nie istnieje, tworzymy je
         statsBox = document.createElement('div');
         statsBox.classList.add('stats-box');
         statsBox.addEventListener('click', toggleStatsBox);
         const chartContainer = document.getElementById('rainChart').parentNode;
-        chartContainer.style.position = 'relative'; // Pozycjonowanie kontenera
+        chartContainer.style.position = 'relative';
         chartContainer.appendChild(statsBox);
     }
 
-    // Aktualizacja treści okienka statystyk i automatyczne jego zwinięcie
     statsBox.innerHTML = `
         <h3>Statystyki ▼</h3>
         <p>Suma opadów: ${sumaOpadow.toFixed(2)} mm</p>
         <p>Średnia opadów: ${sredniaOpadow.toFixed(2)} mm</p>
+        <p>Maks. opady: ${maxOpadow.toFixed(2)} mm</p>
     `;
-    statsBox.classList.remove('open'); // Zwinięcie okienka po aktualizacji
+    statsBox.classList.remove('open');
 }
-
-
-
-
-
-
 
 // Funkcja do rozwijania i zwijania okienka statystyk
 function toggleStatsBox() {
     this.classList.toggle('open');
 }
 
-
-
-
+// Dodanie zdarzenia kliknięcia, aby uruchomić cały proces
 document.getElementById('getRainHistory').addEventListener('click', function() {
     const city = document.getElementById('city').value;
     const startDate = document.getElementById('startDate').value;
@@ -394,9 +384,16 @@ document.getElementById('getRainHistory').addEventListener('click', function() {
     }
 
     console.log(`Pobieranie danych dla miasta: ${city}, od ${startDate} do ${endDate}`);
-    getHistoricalWeather(city, startDate, endDate); // Pobierz dane historyczne
-});
 
+    // Pokaż ikonę ładowania
+    document.getElementById('loadingIcon').style.display = 'block';
+
+    // Wywołanie funkcji do pobrania danych historycznych
+    getHistoricalWeather(city, startDate, endDate).finally(() => {
+        // Ukrycie ikony ładowania po zakończeniu pobierania danych
+        document.getElementById('loadingIcon').style.display = 'none';
+    });
+});
 
 
 
@@ -416,15 +413,21 @@ document.getElementById('compareCitiesButton').addEventListener('click', functio
     const compareCitiesButton = document.getElementById('compareCitiesButton');
     const getRainHistory = document.getElementById('getRainHistory')
     const city = document.getElementById('city').value;
+    const statsBox = document.querySelector('.stats-box');
+    const statsBox2 = document.querySelector('.stats-box2');
 
     if (compareCitiesButton.textContent === "Porównaj dwa miasta") {
         console.log("Włączanie trybu porównania dwóch miast...");
         compareCitiesButton.textContent = "Wróć";
         document.getElementById('cityName').textContent = 'miastach:';
+        statsBox.style.display = 'none';
+        statsBox2.style.display = 'block';
     } else {
         console.log("Wyłączanie trybu porównania dwóch miast...");
         compareCitiesButton.textContent = "Porównaj dwa miasta";
         document.getElementById('cityName').textContent = city;
+        statsBox.style.display = 'block';
+        statsBox2.style.display = 'none';
     }
     
 
@@ -460,6 +463,7 @@ document.getElementById('compareCitiesButton').addEventListener('click', functio
         createEmptyChart('rainChart1', 'Miasto 1 - Ilość opadów');
         createEmptyChart('rainChart2', 'Miasto 2 - Ilość opadów');
     }
+    
 });
 
 // Funkcja do tworzenia pustego wykresu
@@ -512,7 +516,7 @@ let data2 = null;
 
 // Przechowuj dane historyczne w zmiennych globalnych
 function getHistoricalWeatherTwoCities(city1, city2, startDate, endDate) {
-    Promise.all([
+    return Promise.all([ // <- dodano "return"
         fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city1}&appid=${apiKey}`)
             .then(response => response.json())
             .then(data => ({ city: city1, id: data.city.id })),
@@ -543,6 +547,7 @@ function getHistoricalWeatherTwoCities(city1, city2, startDate, endDate) {
             alert('Wystąpił błąd podczas pobierania danych. Spróbuj ponownie.');
         });
 }
+
 
 
 function fetchHistoricalDataForCity(cityId, startTimestamp, endTimestamp, cityName) {
@@ -663,6 +668,70 @@ function createChartForCity(canvasId, rainData, cityName) {
     });
 }
 
+// Tworzenie nowego okienka statystyk (statsBox2) dla dwóch miast
+let statsBox2 = document.querySelector('.stats-box2');
+if (!statsBox2) {
+    // Jeśli statsBox2 jeszcze nie istnieje, tworzymy je
+    statsBox2 = document.createElement('div');
+    statsBox2.classList.add('stats-box2');
+    statsBox2.addEventListener('click', toggleStatsBox); // Możliwość rozwijania/zwijania
+    const chartContainer = document.getElementById('rainChart').parentNode;
+    chartContainer.style.position = 'relative'; // Pozycjonowanie kontenera
+    chartContainer.appendChild(statsBox2);
+
+    // Ustawienie domyślnego napisu "Statystyki"
+    statsBox2.innerHTML = '<h3>Statystyki 2▼</h3>';
+}
+
+// Funkcja do obliczenia statystyk dla danych historycznych
+function calculateRainStats(rainData) {
+    let totalRain = 0;
+    let maxRain = 0;
+    let count = 0;
+
+    for (const date in rainData) {
+        totalRain += rainData[date];
+        if (rainData[date] > maxRain) {
+            maxRain = rainData[date];
+        }
+        count++;
+    }
+
+    const averageRain = totalRain / count;
+
+    return {
+        totalRain,
+        averageRain,
+        maxRain
+    };
+}
+
+// Aktualizacja treści okienka statystyk dla dwóch miast w statsBox2
+function updateStatsBox2(city1RainData, city2RainData) {
+    // Dodajemy logi do konsoli, aby sprawdzić co zawiera city1RainData i city2RainData
+
+    const city1 = document.getElementById('cityInput1').value;
+    const city2 = document.getElementById('cityInput2').value;
+    const city1Stats = calculateRainStats(city1RainData);
+    const city2Stats = calculateRainStats(city2RainData);
+
+    statsBox2.innerHTML = `
+        <h3>Statystyki 2▼</h3>
+        <h4>${city1 || 'Miasto 1'}</h4>
+        <p>Suma opadów: ${city1Stats.totalRain.toFixed(2)} mm</p>
+        <p>Średnia opadów: ${city1Stats.averageRain.toFixed(2)} mm</p>
+        <p>Maks. opady: ${city1Stats.maxRain.toFixed(2)} mm</p>
+
+        <h4>${city2|| 'Miasto 2'}</h4>  
+        <p>Suma opadów: ${city2Stats.totalRain.toFixed(2)} mm</p>
+        <p>Średnia opadów: ${city2Stats.averageRain.toFixed(2)} mm</p>
+        <p>Maks. opady: ${city2Stats.maxRain.toFixed(2)} mm</p>
+    `;
+    statsBox2.classList.remove('open'); // Zwinięcie okienka po aktualizacji
+}
+
+
+// Funkcja wyświetlająca dane deszczu dla obu miast
 function displayTwoRainCharts(data1, data2) {
     const rainData1 = processRainData(data1.data);
     const rainData2 = processRainData(data2.data);
@@ -677,13 +746,13 @@ function displayTwoRainCharts(data1, data2) {
 
     // Upewnienie się, że kontener na wykresy jest widoczny
     document.querySelector('.charts-container').style.display = 'flex';
+
+    // Zaktualizowanie statystyk w nowym oknie statsBox2
+    updateStatsBox2(rainData1, rainData2);
 }
 
 
-
-
-
-// Obsługa kliknięcia przycisku "Porównaj dwa miasta"
+// Obsługa kliknięcia przycisku "Wyświetl historię opadów dla dwóch miast"
 document.getElementById('getRainHistoryTwo').addEventListener('click', function () {
     const city1 = document.getElementById('cityInput1').value;
     const city2 = document.getElementById('cityInput2').value;
@@ -703,6 +772,16 @@ document.getElementById('getRainHistoryTwo').addEventListener('click', function 
     console.log(`Pobieranie danych dla miast: ${city1} i ${city2}, od ${startDate} do ${endDate}`);
 
     getHistoricalWeatherTwoCities(city1, city2, startDate, endDate);
+
+     // Pokaż ikonę ładowania
+    document.getElementById('loadingIcon').style.display = 'block';
+
+    // Wywołanie funkcji do pobrania danych historycznych
+    getHistoricalWeatherTwoCities(city1, city2, startDate, endDate)
+        .finally(() => {
+            // Ukrycie ikony ładowania po zakończeniu pobierania danych
+            document.getElementById('loadingIcon').style.display = 'none';
+        });
 });
 
 
