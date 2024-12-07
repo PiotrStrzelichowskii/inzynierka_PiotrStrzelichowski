@@ -186,7 +186,8 @@ body {
 
 
 /* Styl dla okienka statystyk, aby pojawiło się nad wykresem */
-.stats-box {
+.stats-box ,.stats-box2{
+    display: block;
     position: absolute;
     top: 10px;
     right: 10px;
@@ -201,20 +202,33 @@ body {
     transition: max-height 0.3s ease;
     max-height: 16px; /* Ukryte szczegóły, początkowy stan */
     overflow: hidden;
-    width: 150px;
+    max-width: 150px;
+}
+.stats-box2{
+    display: none;
 }
 
-.stats-box.open {
-    max-height: 100px; /* Wysokość po rozwinięciu */
+.stats-box.open , .stats-box2.open{
+    max-height: fit-content; /* Wysokość po rozwinięciu */
 }
 
-.stats-box h3 {
+.stats-box h3 , .stats-box2 h3{
     margin: 0;
     margin-bottom: 10px;
     font-size: 14px;
 }
+.stats-box2 h3{
+    margin: 0;
+    font-size: 14px;
+}
+.stats-box2 h4{
+    margin: 0;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
 
-.stats-box p {
+.stats-box p, .stats-box2 p{
     margin: 5px 0 0;
     font-size: 13px;
 }
@@ -326,6 +340,28 @@ label, .btn {
     display: flex;
     gap: 10px;
 }
+
+
+#loadingIcon {
+    display: none; /* Domyślnie ukryty */
+    position: fixed; /* Ustawienie na stałe w miejscu */
+    top: 50%; /* Na środku ekranu */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Wyśrodkowanie */
+    z-index: 9999; /* Upewnij się, że jest na wierzchu */
+}
+
+#loadingIcon img {
+    width: 50px;
+    height: 50px;
+    animation: rotate 1s linear infinite; /* Animacja obrotu */
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 
 /* Media query dla ekranów o szerokości poniżej 1000px */
 @media (max-width: 1100px) {
