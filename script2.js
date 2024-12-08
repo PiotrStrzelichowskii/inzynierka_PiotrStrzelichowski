@@ -812,11 +812,6 @@ function downloadRainData() {
 function downloadRainDataTwoCities(rainData1, rainData2, city1, city2) {
     console.log("Funkcja downloadRainDataTwoCities wywołana.");
 
-    if (!rainData1 || !rainData2) {
-        console.error("Dane do pobrania są nieprawidłowe.");
-        alert("Brakuje danych dla jednego lub obu miast.");
-        return;
-    }
 
     const data = [];
     const allDates = new Set([...Object.keys(rainData1), ...Object.keys(rainData2)]);
