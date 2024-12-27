@@ -55,20 +55,17 @@ function getCurrentLocation() {
 // Funkcja do pobierania prognozy pogody
 function getWeather() {
     const city = document.getElementById('city').value;
+    const userLang = navigator.language || navigator.userLanguage;
+    const languageCode = userLang.includes('pl') ? 'pl' : 'en'; // Use 'pl' for Polish, default to 'en'
 
-    if (!city) {
-        alert('Proszę wprowadzić miasto');
-        return;
-    }
-
-    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&lang=${languageCode}`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&lang=${languageCode}`;
 
     fetch(currentWeatherUrl)
         .then(response => response.json())
         .then(data => {
             displayWeather(data);
-            document.getElementById('cityName').textContent = city; // Uaktualnienie nazwy miasta
+            document.getElementById('cityName').textContent = city; // Update city name
         })
         .catch(error => {
             console.error('Błąd podczas pobierania danych o bieżącej pogodzie:', error);
@@ -79,13 +76,14 @@ function getWeather() {
         .then(response => response.json())
         .then(data => {
             displayHourlyForecast(data.list);
-            displayRainForecastChart(data.list); // Wywołanie funkcji do wyświetlenia wykresu
+            displayRainForecastChart(data.list); // Display rain forecast chart
         })
         .catch(error => {
             console.error('Błąd podczas pobierania prognozy godzinowej:', error);
             alert('Błąd podczas pobierania prognozy godzinowej. Spróbuj ponownie.');
         });
 }
+
 
 
 // Mapa tłumaczeń angielskiego opisu pogody na polski
