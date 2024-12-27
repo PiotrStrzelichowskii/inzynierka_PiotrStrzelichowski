@@ -229,6 +229,40 @@ function displayRainForecastChart(forecastData) {
 
 
 
+
+
+
+
+
+// Dodanie zdarzenia kliknięcia, aby uruchomić cały proces
+document.getElementById('getRainHistory').addEventListener('click', function() {
+    const city = document.getElementById('city').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (!city || !startDate || !endDate) {
+        alert('Proszę podać miasto, datę początkową i datę końcową.');
+        return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Data początkowa musi być przed datą końcową.');
+        return;
+    }
+
+    console.log(`Pobieranie danych dla miasta: ${city}, od ${startDate} do ${endDate}`);
+
+    // Pokaż ikonę ładowania
+    document.getElementById('loadingIcon').style.display = 'block';
+
+    // Wywołanie funkcji do pobrania danych historycznych
+    getHistoricalWeather(city, startDate, endDate).finally(() => {
+        // Ukrycie ikony ładowania po zakończeniu pobierania danych
+        document.getElementById('loadingIcon').style.display = 'none';
+    });
+});
+
+
 // Funkcja do pobierania danych historycznych dla wybranego okresu
 async function getHistoricalWeather(city, startDate, endDate) {
     try {
@@ -251,7 +285,7 @@ async function fetchHistoricalData(cityId, startTimestamp, endTimestamp) {
     let historicalData = [];
 
     while (currentStart < endTimestamp) {
-        const currentEnd = Math.min(currentStart + (7 * 24 * 60 * 60), endTimestamp); // Pobieramy dane w 7-dniowych okresach
+        const currentEnd = Math.min(currentStart + (7 * 24 * 60 * 60), endTimestamp); // dane w 7-dniowych okresach
         const url = `https://history.openweathermap.org/data/2.5/history/city?id=${cityId}&type=hour&start=${currentStart}&end=${currentEnd}&appid=${apiKey}`;
 
         try {
@@ -265,7 +299,7 @@ async function fetchHistoricalData(cityId, startTimestamp, endTimestamp) {
         }
     }
 
-    processHistoricalData(historicalData); // Przetwarzamy dane po zakończeniu pobierania
+    processHistoricalData(historicalData); 
 }
 
 // Funkcja do przetwarzania pobranych danych historycznych
@@ -278,12 +312,12 @@ function processHistoricalData(historicalData) {
         if (!rainData[date]) {
             rainData[date] = 0;
         }
-        rainData[date] += rain; // Sumujemy opady dla tego samego dnia
+        rainData[date] += rain; 
     });
 
-    storedRainData = rainData; // Przechowywanie danych opadów
+    storedRainData = rainData; 
 
-    displayRainChart(rainData); // Wyświetlenie wykresu
+    displayRainChart(rainData); 
 }
 
 // Funkcja do wyświetlania wykresu z danymi opadów
@@ -298,10 +332,10 @@ function displayRainChart(rainData) {
     const maxOpadow = Math.max(...data);
 
     const backgroundColors = data.map(value =>
-        value === maxOpadow ? 'rgba(255, 99, 132, 0.5)' : 'rgba(54, 162, 235, 0.5)'
+        value === maxOpadow ? 'rgba(6, 22, 124, 0.5)' : 'rgba(54, 162, 235, 0.5)'
     );
     const borderColors = data.map(value =>
-        value === maxOpadow ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)'
+        value === maxOpadow ? 'rgba(6, 22, 124, 1)' : 'rgba(54, 162, 235, 1)'
     );
 
     // Sprawdzamy, czy rainChart istnieje i niszczymy go, jeśli tak
@@ -367,33 +401,7 @@ function toggleStatsBox() {
     this.classList.toggle('open');
 }
 
-// Dodanie zdarzenia kliknięcia, aby uruchomić cały proces
-document.getElementById('getRainHistory').addEventListener('click', function() {
-    const city = document.getElementById('city').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
 
-    if (!city || !startDate || !endDate) {
-        alert('Proszę podać miasto, datę początkową i datę końcową.');
-        return;
-    }
-
-    if (new Date(startDate) > new Date(endDate)) {
-        alert('Data początkowa musi być przed datą końcową.');
-        return;
-    }
-
-    console.log(`Pobieranie danych dla miasta: ${city}, od ${startDate} do ${endDate}`);
-
-    // Pokaż ikonę ładowania
-    document.getElementById('loadingIcon').style.display = 'block';
-
-    // Wywołanie funkcji do pobrania danych historycznych
-    getHistoricalWeather(city, startDate, endDate).finally(() => {
-        // Ukrycie ikony ładowania po zakończeniu pobierania danych
-        document.getElementById('loadingIcon').style.display = 'none';
-    });
-});
 
 
 
@@ -626,6 +634,18 @@ function createChartForCity(canvasId, rainData, cityName) {
     const labels = Object.keys(rainData);
     const data = Object.values(rainData);
 
+    // Znalezienie indeksu maksymalnej wartości
+    const maxRain = Math.max(...data);
+    const maxRainIndex = data.indexOf(maxRain);
+
+    // Generowanie kolorów z wyróżnieniem maksymalnej wartości
+    const backgroundColors = data.map((value, index) =>
+        index === maxRainIndex ? 'rgba(6, 22, 124, 0.5)' : 'rgba(54, 162, 235, 0.5)'
+    );
+    const borderColors = data.map((value, index) =>
+        index === maxRainIndex ? 'rgba(6, 22, 124, 1)' : 'rgba(54, 162, 235, 1)'
+    );
+
     const ctx = document.getElementById(canvasId)?.getContext('2d');
     if (!ctx) {
         console.error(`Nie znaleziono elementu canvas o ID: ${canvasId}`);
@@ -640,8 +660,8 @@ function createChartForCity(canvasId, rainData, cityName) {
             datasets: [{
                 label: 'Opady w ' + cityName,
                 data: data,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
                 borderWidth: 1
             }]
         },
@@ -664,9 +684,9 @@ function createChartForCity(canvasId, rainData, cityName) {
                 }
             }
         }
-        
     });
 }
+
 
 // Tworzenie nowego okienka statystyk (statsBox2) dla dwóch miast
 let statsBox2 = document.querySelector('.stats-box2');
@@ -802,11 +822,8 @@ function downloadRainData() {
     // Tworzenie dynamicznej nazwy pliku
     const fileName = `dane_opadow_${city}.xlsx`;
 
-    // Eksport pliku Excel z dynamiczną nazwą
     XLSX.writeFile(workbook, fileName);
 }
-
-
 
 // Funkcja do pobierania danych dla dwóch miast
 function downloadRainDataTwoCities(rainData1, rainData2, city1, city2) {
