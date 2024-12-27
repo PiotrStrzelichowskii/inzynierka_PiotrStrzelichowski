@@ -8,27 +8,19 @@ body {
     justify-content: center;
     align-items: center;
     height: auto;
-    
-    /* Ustawienie obrazu jako tła */
     background-image: url('backimage.webp'); 
     background-size: cover; 
     background-position: center; 
     background-repeat: no-repeat; 
     background-attachment: fixed; 
-    overflow-x: hidden; /* Usuń przewijanie w poziomie */
+    overflow-x: hidden; 
 }
-
-
 .container {
     width: 90%;
     max-width: 1400px;
     justify-content: center;
     align-items: center;
 }
-
-
-
-
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -36,7 +28,6 @@ body {
     margin-top: 2rem;
     margin-bottom: 3rem;
 }
-
 .info-con {
     display: flex;
     align-items: center;
@@ -44,8 +35,6 @@ body {
     margin-bottom: 10px;
     max-height: 160px;
 }
-
-
 #weather-icon {
     max-width: 160px;
 }
@@ -90,15 +79,6 @@ body {
     height: 40px;
 }
 
-.weather-tile input[type="text"] {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 1rem;
-    box-sizing: border-box;
-}
-
 .rain-history-tile input[type="date"] {
     width: auto;
     padding: 10px;
@@ -116,6 +96,8 @@ body {
     height: 90vh;
     display: flex;
     flex-direction: column;
+}
+.tile, .weather-container{
     justify-content: space-between;
 }
 .tile{
@@ -140,38 +122,31 @@ body {
 
 .charts-container {
     display: flex;
-    gap: 1rem; /* Odstęp między wykresami */
-    justify-content: space-evenly; /* Równomierne rozmieszczenie */
-    align-items: flex-start; /* Wyrównanie do góry */
-    width: 100%; /* Pełna szerokość kontenera */
+    gap: 1rem; 
+    justify-content: space-evenly; 
+    align-items: flex-start; 
+    width: 100%; 
     padding: 10px;
-    box-sizing: border-box; /* Uwzględnij padding w szerokości */
+    box-sizing: border-box; 
     height: 60vh;
-    
 }
 
-
-
 #rainChart1, #rainChart2 {
-    flex: 1; /* Każdy wykres zajmuje około 45% dostępnej szerokości */
-    max-width: 50%; /* Maksymalna szerokość (opcjonalne ograniczenie) */
-    height: auto; /* Automatyczna wysokość */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efekt cienia */
-    border: 1px solid #ddd; /* Opcjonalna ramka */
-    padding: 10px; /* Opcjonalny odstęp wokół wykresu */
+    flex: 1; 
+    max-width: 50%; 
+    height: auto; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    border: 1px solid #ddd; 
+    padding: 10px; 
     border-radius: 1rem;
 }
 
-
-
-
-/* Stylowanie samego tooltipu (informacji wyświetlanej po najechaniu na wykres) */
 .chartjs-tooltip {
-    background-color: rgba(0, 0, 0, 0.8); /* Ciemne tło dla tooltipu */
-    color: white; /* Kolor tekstu w tooltipie */
-    border-radius: 5px; /* Zaokrąglenie krawędzi tooltipu */
-    padding: 8px; /* Wewnętrzne odstępy */
-    font-size: 14px; /* Rozmiar czcionki tooltipu */
+    background-color: rgba(0, 0, 0, 0.8); 
+    color: white; 
+    border-radius: 5px; 
+    padding: 8px; 
+    font-size: 14px; 
 }
 
 #cityInputsContainer {
@@ -181,11 +156,6 @@ body {
     justify-content: center;
 }
 
-
-
-
-
-/* Styl dla okienka statystyk, aby pojawiło się nad wykresem */
 .stats-box ,.stats-box2{
     display: block;
     position: absolute;
@@ -200,7 +170,7 @@ body {
     font-size: 14px;
     z-index: 10;
     transition: max-height 0.3s ease;
-    max-height: 16px; /* Ukryte szczegóły, początkowy stan */
+    max-height: 16px; 
     overflow: hidden;
     max-width: 150px;
 }
@@ -209,7 +179,7 @@ body {
 }
 
 .stats-box.open , .stats-box2.open{
-    max-height: fit-content; /* Wysokość po rozwinięciu */
+    max-height: fit-content; 
 }
 
 .stats-box h3 , .stats-box2 h3{
@@ -233,9 +203,6 @@ body {
     font-size: 13px;
 }
 
-
-
-
 #weatherResult, #historicalWeatherResult {
     margin-top: 20px;
     font-size: 1.2em;
@@ -246,7 +213,7 @@ label {
     margin: 10px 0 5px;
 }
 label, .btn {
-    font-size: 12px; /* Zmniejszenie rozmiaru tekstu przycisków i etykiet */
+    font-size: 12px; 
 }
 .search-container{
     display: flex;
@@ -292,7 +259,6 @@ label, .btn {
     max-width: 10rem;
 }
 
-
 .btn:hover, .btn1:hover{
     color: rgb(255, 255, 255);
     background: rgb(0, 102, 204);
@@ -308,23 +274,21 @@ label, .btn {
     border-radius: 1rem;
 }
 
-
-
 .date-and-buttons-container {
     display: flex;
     justify-content: center;
-    align-items: center; /* Wyrównanie do dołu */
-    gap: 20px; /* Odstęp między datami a przyciskami */
-    flex-wrap: wrap; /* Umożliwia przenoszenie elementów w przypadku małego ekranu */
+    align-items: center; 
+    gap: 20px; 
+    flex-wrap: wrap; 
 }
 
 .date-input {
     display: flex;
-    flex-direction: column; /* Etykieta nad inputem */
+    flex-direction: column; 
 }
 
 .date-input label {
-    margin-bottom: 5px; /* Odstęp między etykietą a inputem */
+    margin-bottom: 5px; 
     font-size: 14px;
 }
 
@@ -341,20 +305,19 @@ label, .btn {
     gap: 10px;
 }
 
-
 #loadingIcon {
-    display: none; /* Domyślnie ukryty */
-    position: fixed; /* Ustawienie na stałe w miejscu */
-    top: 50%; /* Na środku ekranu */
+    display: none; 
+    position: fixed; 
+    top: 50%; 
     left: 50%;
-    transform: translate(-50%, -50%); /* Wyśrodkowanie */
-    z-index: 9999; /* Upewnij się, że jest na wierzchu */
+    transform: translate(-50%, -50%); 
+    z-index: 9999; 
 }
 
 #loadingIcon img {
     width: 50px;
     height: 50px;
-    animation: rotate 1s linear infinite; /* Animacja obrotu */
+    animation: rotate 1s linear infinite; 
 }
 
 @keyframes rotate {
@@ -362,8 +325,6 @@ label, .btn {
     100% { transform: rotate(360deg); }
 }
 
-
-/* Media query dla ekranów o szerokości poniżej 1000px */
 @media (max-width: 1100px) {
     .charts-container {
         flex-wrap: wrap;  
@@ -373,16 +334,14 @@ label, .btn {
 
     #rainChart1, #rainChart2 {
         width: 100%;
-        max-width: 100%;  /* Zwiększamy szerokość wykresów, aby lepiej pasowały do mniejszych ekranów */
-        max-height: 45vh;  /* Dostosowanie wysokości wykresów dla mniejszych ekranów */
+        max-width: 100%;  
+        max-height: 45vh;  
     }
 }
 
-
-
 @media screen and (max-width: 720px) {
     .date-and-buttons-container {
-        flex-direction: column; /* Układaj daty i przyciski jeden pod drugim na małych ekranach */
+        flex-direction: column; 
         align-items: center;
     }
 
@@ -396,12 +355,29 @@ label, .btn {
     }
 
     .grid {
-        
         margin-top: 10px;
     }
-
-   
 }
 
 
+@media screen and (max-width: 550px) {
+    .weather-container, .map-con{
+        max-width: 460px;
+        max-height: 90vh;
+    }
 
+    #cityInput1, #cityInput2{
+        max-width: 100px;
+    }
+}
+
+
+@media screen and (max-width: 450px) {
+    .weather-container, .map-con{
+        max-width: 360px;
+    }
+
+    #cityInput1, #cityInput2{
+        max-width: 100px;
+    }
+}
