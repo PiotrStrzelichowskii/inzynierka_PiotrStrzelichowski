@@ -635,7 +635,7 @@ function destroyChart(chartInstance, canvasId) {
     resetCanvas(canvasId);
 }
 
-function createChartForCity(canvasId, rainData, cityName) {
+function createChartForCity(canvasId, rainData, cityName, maxRainScale) {
     const labels = Object.keys(rainData);
     const data = Object.values(rainData);
 
@@ -676,6 +676,7 @@ function createChartForCity(canvasId, rainData, cityName) {
             scales: {
                 y: {
                     beginAtZero: true,
+                    max: maxRainScale, // Ustawienie maksymalnej wartości osi Y
                     title: {
                         display: true,
                         text: 'Opady (mm)'
@@ -761,13 +762,18 @@ function displayTwoRainCharts(data1, data2) {
     const rainData1 = processRainData(data1.data);
     const rainData2 = processRainData(data2.data);
 
+    // Obliczenie wspólnego maksymalnego zakresu dla osi Y
+    const maxRain1 = Math.max(...Object.values(rainData1));
+    const maxRain2 = Math.max(...Object.values(rainData2));
+    const globalMaxRain = Math.max(maxRain1, maxRain2); // Wspólny maksymalny zakres
+
     // Usuń istniejące wykresy i zresetuj płótna
     destroyChart(rainChart1Instance, 'rainChart1');
     destroyChart(rainChart2Instance, 'rainChart2');
 
-    // Tworzenie nowych wykresów
-    rainChart1Instance = createChartForCity('rainChart1', rainData1, data1.cityName);
-    rainChart2Instance = createChartForCity('rainChart2', rainData2, data2.cityName);
+    // Tworzenie nowych wykresów z tą samą skalą Y
+    rainChart1Instance = createChartForCity('rainChart1', rainData1, data1.cityName, globalMaxRain);
+    rainChart2Instance = createChartForCity('rainChart2', rainData2, data2.cityName, globalMaxRain);
 
     // Upewnienie się, że kontener na wykresy jest widoczny
     document.querySelector('.charts-container').style.display = 'flex';
@@ -775,7 +781,6 @@ function displayTwoRainCharts(data1, data2) {
     // Zaktualizowanie statystyk w nowym oknie statsBox2
     updateStatsBox2(rainData1, rainData2);
 }
-
 
 // Obsługa kliknięcia przycisku "Wyświetl historię opadów dla dwóch miast"
 document.getElementById('getRainHistoryTwo').addEventListener('click', function () {
